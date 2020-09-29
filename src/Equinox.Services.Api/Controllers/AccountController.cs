@@ -1,82 +1,92 @@
-﻿using System.Security.Claims;
-using System.Threading.Tasks;
-using Equinox.Domain.Core.Bus;
-using Equinox.Domain.Core.Notifications;
-using Equinox.Infra.CrossCutting.Identity.Models;
-using Equinox.Infra.CrossCutting.Identity.Models.AccountViewModels;
-using MediatR;
-using Microsoft.AspNetCore.Authorization;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using NetDevPack.Identity.Jwt;
+using NetDevPack.Identity.Model;
 
 namespace Equinox.Services.Api.Controllers
 {
-    [Authorize]
+    [Route("api/[controller]")]
+    [ApiController]
     public class AccountController : ApiController
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly ILogger _logger;
+        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly AppJwtSettings _appJwtSettings;
 
         public AccountController(
-            UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager,
-            INotificationHandler<DomainNotification> notifications,
-            ILoggerFactory loggerFactory,
-            IMediatorHandler mediator) : base(notifications, mediator)
+            SignInManager<IdentityUser> signInManager,
+            UserManager<IdentityUser> userManager,
+            IOptions<AppJwtSettings> appJwtSettings)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _logger = loggerFactory.CreateLogger<AccountController>();
+            _appJwtSettings = appJwtSettings.Value;
         }
 
         [HttpPost]
-        [AllowAnonymous]
-        [Route("account")]
-        public async Task<IActionResult> Login([FromBody] LoginViewModel model)
+        [Route("register")]
+        public async Task<ActionResult> Register(RegisterUser registerUser)
         {
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid) return CustomResponse(ModelState);
+
+            var user = new IdentityUser
             {
-                NotifyModelStateErrors();
-                return Response(model);
-            }
+                UserName = registerUser.Email,
+                Email = registerUser.Email,
+                EmailConfirmed = true
+            };
 
-            var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, true);
-            if (!result.Succeeded)
-                NotifyError(result.ToString(), "Login failure");
-
-            _logger.LogInformation(1, "User logged in.");
-            return Response(model);
-        }
-
-        [HttpPost]
-        [AllowAnonymous]
-        [Route("account/register")]
-        public async Task<IActionResult> Register(RegisterViewModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                NotifyModelStateErrors();
-                return Response(model);
-            }
-
-            var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
-
-            var result = await _userManager.CreateAsync(user, model.Password);
+            var result = await _userManager.CreateAsync(user, registerUser.Password);
 
             if (result.Succeeded)
             {
-                // User claim for write customers data
-                await _userManager.AddClaimAsync(user, new Claim("Customers", "Write"));
-
-                await _signInManager.SignInAsync(user, false);
-                _logger.LogInformation(3, "User created a new account with password.");
-                return Response(model);
+                return CustomResponse(GetFullJwt(user.Email));
             }
 
-            AddIdentityErrors(result);
-            return Response(model);
+            foreach (var error in result.Errors)
+            {
+                AddError(error.Description);
+            }
+
+            return CustomResponse();
+        }
+
+        [HttpPost]
+        [Route("login")]
+        public async Task<IActionResult> Login(LoginUser loginUser)
+        {
+            if (!ModelState.IsValid) return CustomResponse(ModelState);
+
+            var result = await _signInManager.PasswordSignInAsync(loginUser.Email, loginUser.Password, false, true);
+
+            if (result.Succeeded)
+            {
+                var fullJwt = GetFullJwt(loginUser.Email);
+                return CustomResponse(fullJwt);
+            }
+
+            if (result.IsLockedOut)
+            {
+                AddError("This user is temporarily blocked");
+                return CustomResponse();
+            }
+
+            AddError("Incorrect user or password");
+            return CustomResponse();
+        }
+
+        private string GetFullJwt(string email)
+        {
+            return new JwtBuilder()
+                .WithUserManager(_userManager)
+                .WithJwtSettings(_appJwtSettings)
+                .WithEmail(email)
+                .WithJwtClaims()
+                .WithUserClaims()
+                .WithUserRoles()
+                .BuildToken();
         }
     }
 }

@@ -1,26 +1,21 @@
-﻿using Equinox.Infra.CrossCutting.Identity.Authorization;
-using Equinox.Infra.CrossCutting.Identity.Data;
-using Equinox.Infra.CrossCutting.Identity.Models;
-using Equinox.Infra.CrossCutting.IoC;
+using Equinox.Infra.CrossCutting.Identity;
 using Equinox.Services.Api.Configurations;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Formatters;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Swashbuckle.AspNetCore.Swagger;
+using Microsoft.Extensions.Hosting;
+using NetDevPack.Identity;
+using NetDevPack.Identity.User;
 
-namespace Equinox.Services.Api
+namespace Equinox.Services.API
 {
     public class Startup
     {
         public IConfiguration Configuration { get; }
 
-        public Startup(IHostingEnvironment env)
+        public Startup(IHostEnvironment env)
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
@@ -36,62 +31,43 @@ namespace Equinox.Services.Api
             Configuration = builder.Build();
         }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            // WebAPI Config
+            services.AddControllers();
 
-            services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
+            // Setting DBContexts
+            services.AddDatabaseConfiguration(Configuration);
 
-            services.AddMvc(options =>
-            {
-                options.OutputFormatters.Remove(new XmlDataContractSerializerOutputFormatter());
-                options.UseCentralRoutePrefix(new RouteAttribute("api/v{version}"));
-            })
-            .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            // ASP.NET Identity Settings & JWT
+            services.AddApiIdentityConfiguration(Configuration);
 
-            services.AddAutoMapperSetup();
+            // Interactive AspNetUser (logged in)
+            services.AddAspNetUserConfiguration();
 
-            services.AddAuthorization(options =>
-            {
-                options.AddPolicy("CanWriteCustomerData", policy => policy.Requirements.Add(new ClaimRequirement("Customers", "Write")));
-                options.AddPolicy("CanRemoveCustomerData", policy => policy.Requirements.Add(new ClaimRequirement("Customers", "Remove")));
-            });
+            // AutoMapper Settings
+            services.AddAutoMapperConfiguration();
 
-            services.AddSwaggerGen(s =>
-            {
-                s.SwaggerDoc("v1", new Info
-                {
-                    Version = "v1",
-                    Title = "Equinox Project",
-                    Description = "Equinox API Swagger surface",
-                    Contact = new Contact { Name = "Eduardo Pires", Email = "contato@eduardopires.net.br", Url = "http://www.eduardopires.net.br" },
-                    License = new License { Name = "MIT", Url = "https://github.com/EduardoPires/EquinoxProject/blob/master/LICENSE" }
-                });
-            });
+            // Swagger Config
+            services.AddSwaggerConfiguration();
 
             // Adding MediatR for Domain Events and Notifications
             services.AddMediatR(typeof(Startup));
 
             // .NET Native DI Abstraction
-            RegisterServices(services);
+            services.AddDependencyInjectionConfiguration();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
-            else
-            {
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-            }
+
+            app.UseHttpsRedirection();
+
+            app.UseRouting();
 
             app.UseCors(c =>
             {
@@ -100,21 +76,14 @@ namespace Equinox.Services.Api
                 c.AllowAnyOrigin();
             });
 
-            app.UseHttpsRedirection();
-            app.UseAuthentication();
-            app.UseMvc();
+            app.UseAuthConfiguration();
 
-            app.UseSwagger();
-            app.UseSwaggerUI(s =>
+            app.UseEndpoints(endpoints =>
             {
-                s.SwaggerEndpoint("/swagger/v1/swagger.json", "Equinox Project API v1.1");
+                endpoints.MapControllers();
             });
-        }
 
-        private static void RegisterServices(IServiceCollection services)
-        {
-            // Adding dependencies from another layers (isolated from Presentation)
-            NativeInjectorBootStrapper.RegisterServices(services);
+            app.UseSwaggerSetup();
         }
     }
 }
