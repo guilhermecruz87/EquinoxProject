@@ -1,12 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Equinox.Application.EventSourcedNormalizers;
 using Equinox.Application.Interfaces;
 using Equinox.Application.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NetDevPack.Identity.Authorization;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Equinox.Services.Api.Controllers
 {
@@ -36,14 +36,14 @@ namespace Equinox.Services.Api.Controllers
 
         [CustomAuthorize("Customers", "Write")]
         [HttpPost("customer-management")]
-        public async Task<IActionResult> Post([FromBody]CustomerViewModel customerViewModel)
+        public async Task<IActionResult> Post([FromBody] CustomerViewModel customerViewModel)
         {
             return !ModelState.IsValid ? CustomResponse(ModelState) : CustomResponse(await _customerAppService.Register(customerViewModel));
         }
 
         [CustomAuthorize("Customers", "Write")]
         [HttpPut("customer-management")]
-        public async Task<IActionResult> Put([FromBody]CustomerViewModel customerViewModel)
+        public async Task<IActionResult> Put([FromBody] CustomerViewModel customerViewModel)
         {
             return !ModelState.IsValid ? CustomResponse(ModelState) : CustomResponse(await _customerAppService.Update(customerViewModel));
         }

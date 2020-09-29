@@ -1,12 +1,12 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Equinox.Domain.Events;
+﻿using Equinox.Domain.Events;
 using Equinox.Domain.Interfaces;
 using Equinox.Domain.Models;
 using FluentValidation.Results;
 using MediatR;
 using NetDevPack.Messaging;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Equinox.Domain.Commands
 {

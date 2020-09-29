@@ -1,10 +1,10 @@
-﻿using System;
-using System.Linq;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Equinox.Domain.Core.Events;
+﻿using Equinox.Domain.Core.Events;
 using Equinox.Infra.Data.Context;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Equinox.Infra.Data.Repository.EventSourcing
 {

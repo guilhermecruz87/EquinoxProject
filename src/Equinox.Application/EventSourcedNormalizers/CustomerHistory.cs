@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Equinox.Domain.Core.Events;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
-using Equinox.Domain.Core.Events;
 
 namespace Equinox.Application.EventSourcedNormalizers
 {
@@ -34,7 +34,7 @@ namespace Equinox.Application.EventSourcedNormalizers
                         : change.Email,
                     BirthDate = string.IsNullOrWhiteSpace(change.BirthDate) || change.BirthDate == last.BirthDate
                         ? ""
-                        : change.BirthDate.Substring(0,10),
+                        : change.BirthDate.Substring(0, 10),
                     Action = string.IsNullOrWhiteSpace(change.Action) ? "" : change.Action,
                     Timestamp = change.Timestamp,
                     Who = change.Who
@@ -59,19 +59,21 @@ namespace Equinox.Application.EventSourcedNormalizers
                         historyData.Action = "Registered";
                         historyData.Who = e.User;
                         break;
+
                     case "CustomerUpdatedEvent":
                         historyData.Action = "Updated";
                         historyData.Who = e.User;
                         break;
+
                     case "CustomerRemovedEvent":
                         historyData.Action = "Removed";
                         historyData.Who = e.User;
                         break;
+
                     default:
                         historyData.Action = "Unrecognized";
                         historyData.Who = e.User ?? "Anonymous";
                         break;
-
                 }
                 HistoryData.Add(historyData);
             }

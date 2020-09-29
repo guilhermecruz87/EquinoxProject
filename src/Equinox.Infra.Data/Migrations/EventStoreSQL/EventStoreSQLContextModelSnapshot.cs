@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Equinox.Infra.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Equinox.Infra.Data.Context;
+using System;
 
 namespace Equinox.Infra.Data.Migrations.EventStoreSQL
 {

@@ -1,8 +1,8 @@
 using Equinox.Infra.CrossCutting.Identity;
 using Equinox.UI.Web.Configurations;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,7 +15,6 @@ namespace Equinox.UI.Web
     public class Startup
     {
         public IConfiguration Configuration { get; }
-
 
         public Startup(IHostEnvironment env)
         {

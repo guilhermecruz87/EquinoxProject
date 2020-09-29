@@ -4,7 +4,6 @@ using NetDevPack.Identity.User;
 using NetDevPack.Messaging;
 using Newtonsoft.Json;
 
-
 namespace Equinox.Infra.Data.EventSourcing
 {
     public class SqlEventStore : IEventStore

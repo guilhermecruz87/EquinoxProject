@@ -1,5 +1,5 @@
-﻿using System;
-using NetDevPack.Domain;
+﻿using NetDevPack.Domain;
+using System;
 
 namespace Equinox.Domain.Models
 {

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using Equinox.Application.EventSourcedNormalizers;
 using Equinox.Application.Interfaces;
 using Equinox.Application.ViewModels;
@@ -10,6 +7,9 @@ using Equinox.Domain.Interfaces;
 using Equinox.Infra.Data.Repository.EventSourcing;
 using FluentValidation.Results;
 using NetDevPack.Mediator;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Equinox.Application.Services
 {

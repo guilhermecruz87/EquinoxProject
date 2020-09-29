@@ -1,7 +1,7 @@
-﻿using System;
-using AutoMapper;
+﻿using AutoMapper;
 using Equinox.Application.AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace Equinox.Services.Api.Configurations
 {

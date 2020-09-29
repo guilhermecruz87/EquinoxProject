@@ -2,12 +2,13 @@
 using Equinox.Infra.Data.Mappings;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace Equinox.Infra.Data.Context
 {
     public class EventStoreSqlContext : DbContext
     {
-        public EventStoreSqlContext(DbContextOptions<EventStoreSqlContext> options) : base(options) { }
+        public EventStoreSqlContext(DbContextOptions<EventStoreSqlContext> options) : base(options)
+        {
+        }
 
         public DbSet<StoredEvent> StoredEvent { get; set; }
 

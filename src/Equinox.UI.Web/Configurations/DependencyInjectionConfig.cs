@@ -1,6 +1,6 @@
-﻿using System;
-using Equinox.Infra.CrossCutting.IoC;
+﻿using Equinox.Infra.CrossCutting.IoC;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace Equinox.UI.Web.Configurations
 {

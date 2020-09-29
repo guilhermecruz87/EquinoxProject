@@ -1,10 +1,10 @@
-using System;
-using System.Threading.Tasks;
 using Equinox.Application.Interfaces;
 using Equinox.Application.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NetDevPack.Identity.Authorization;
+using System;
+using System.Threading.Tasks;
 
 namespace Equinox.UI.Web.Controllers
 {
@@ -17,6 +17,7 @@ namespace Equinox.UI.Web.Controllers
         {
             _customerAppService = customerAppService;
         }
+
         [AllowAnonymous]
         [HttpGet("customer-management/list-all")]
         public async Task<IActionResult> Index()
@@ -49,7 +50,7 @@ namespace Equinox.UI.Web.Controllers
         public async Task<IActionResult> Create(CustomerViewModel customerViewModel)
         {
             if (!ModelState.IsValid) return View(customerViewModel);
-            
+
             if (ResponseHasErrors(await _customerAppService.Register(customerViewModel)))
                 return View(customerViewModel);
 
@@ -76,7 +77,7 @@ namespace Equinox.UI.Web.Controllers
         public async Task<IActionResult> Edit(CustomerViewModel customerViewModel)
         {
             if (!ModelState.IsValid) return View(customerViewModel);
-            
+
             if (ResponseHasErrors(await _customerAppService.Update(customerViewModel)))
                 return View(customerViewModel);
 
