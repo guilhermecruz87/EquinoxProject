@@ -2,10 +2,12 @@
 using Equinox.Infra.Data.Mappings;
 using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using NetDevPack.Data;
 using NetDevPack.Domain;
 using NetDevPack.Mediator;
 using NetDevPack.Messaging;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -36,6 +38,17 @@ namespace Equinox.Infra.Data.Context
             modelBuilder.ApplyConfiguration(new CustomerMap());
 
             base.OnModelCreating(modelBuilder);
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            var config = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .Build();
+
+            string strConnection = @"Server=192.168.100.4;Database=UberFit;User Id=sa;Password=GuILh3Rm3_123456;Trusted_Connection=False;MultipleActiveResultSets=true;App=EquinoxApi";
+            optionsBuilder.UseSqlServer(strConnection);
         }
 
         public async Task<bool> Commit()
