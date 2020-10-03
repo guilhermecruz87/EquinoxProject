@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Equinox.Application.EventSourcedNormalizers;
+using Equinox.Application.EventSourcedNormalizers.Customer;
 using Equinox.Application.Interfaces;
 using Equinox.Application.ViewModels;
 using Equinox.Domain.Commands;

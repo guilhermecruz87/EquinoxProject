@@ -4,37 +4,37 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 
-namespace Equinox.Application.EventSourcedNormalizers
+namespace Equinox.Application.EventSourcedNormalizers.Personal
 {
-    public static class CustomerHistory
+    public class PersonalHistory
     {
-        public static IList<CustomerHistoryData> HistoryData { get; set; }
+        public static IList<PersonalHistoryData> HistoryData { get; set; }
 
-        public static IList<CustomerHistoryData> ToJavaScriptCustomerHistory(IList<StoredEvent> storedEvents)
+        public static IList<PersonalHistoryData> ToJavaScriptCustomerHistory(IList<StoredEvent> storedEvents)
         {
-            HistoryData = new List<CustomerHistoryData>();
+            HistoryData = new List<PersonalHistoryData>();
             CustomerHistoryDeserializer(storedEvents);
 
             var sorted = HistoryData.OrderBy(c => c.Timestamp);
-            var list = new List<CustomerHistoryData>();
-            var last = new CustomerHistoryData();
+            var list = new List<PersonalHistoryData>();
+            var last = new PersonalHistoryData();
 
             foreach (var change in sorted)
             {
-                var jsSlot = new CustomerHistoryData
+                var jsSlot = new PersonalHistoryData
                 {
                     Id = change.Id == Guid.Empty.ToString() || change.Id == last.Id
-                        ? ""
-                        : change.Id,
+                            ? ""
+                            : change.Id,
                     Name = string.IsNullOrWhiteSpace(change.Name) || change.Name == last.Name
-                        ? ""
-                        : change.Name,
+                            ? ""
+                            : change.Name,
                     Email = string.IsNullOrWhiteSpace(change.Email) || change.Email == last.Email
-                        ? ""
-                        : change.Email,
+                            ? ""
+                            : change.Email,
                     BirthDate = string.IsNullOrWhiteSpace(change.BirthDate) || change.BirthDate == last.BirthDate
-                        ? ""
-                        : change.BirthDate.Substring(0, 10),
+                            ? ""
+                            : change.BirthDate.Substring(0, 10),
                     Action = string.IsNullOrWhiteSpace(change.Action) ? "" : change.Action,
                     Timestamp = change.Timestamp,
                     Who = change.Who
@@ -43,6 +43,7 @@ namespace Equinox.Application.EventSourcedNormalizers
                 list.Add(jsSlot);
                 last = change;
             }
+
             return list;
         }
 
@@ -50,22 +51,22 @@ namespace Equinox.Application.EventSourcedNormalizers
         {
             foreach (var e in storedEvents)
             {
-                var historyData = JsonSerializer.Deserialize<CustomerHistoryData>(e.Data);
+                var historyData = JsonSerializer.Deserialize<PersonalHistoryData>(e.Data);
                 historyData.Timestamp = DateTime.Parse(historyData.Timestamp).ToString("yyyy'-'MM'-'dd' - 'HH':'mm':'ss");
 
                 switch (e.MessageType)
                 {
-                    case "CustomerRegisteredEvent":
+                    case "PersonalRegisteredEvent":
                         historyData.Action = "Registered";
                         historyData.Who = e.User;
                         break;
 
-                    case "CustomerUpdatedEvent":
+                    case "PersonalUpdatedEvent":
                         historyData.Action = "Updated";
                         historyData.Who = e.User;
                         break;
 
-                    case "CustomerRemovedEvent":
+                    case "PersonalRemovedEvent":
                         historyData.Action = "Removed";
                         historyData.Who = e.User;
                         break;

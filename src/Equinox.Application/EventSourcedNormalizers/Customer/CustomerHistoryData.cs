@@ -1,4 +1,4 @@
-﻿namespace Equinox.Application.EventSourcedNormalizers
+﻿namespace Equinox.Application.EventSourcedNormalizers.Customer
 {
     public class CustomerHistoryData
     {
