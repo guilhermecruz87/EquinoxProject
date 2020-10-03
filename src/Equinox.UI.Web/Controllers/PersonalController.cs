@@ -1,5 +1,6 @@
 ﻿using Equinox.Application.Interfaces;
 using Equinox.Application.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NetDevPack.Identity.Authorization;
 using System;
@@ -14,6 +15,13 @@ namespace Equinox.UI.Web.Controllers
         public PersonalController(IPersonalAppService personalAppService)
         {
             _personalAppService = personalAppService;
+        }
+
+        [AllowAnonymous]
+        [HttpGet("personal-management/list-all")]
+        public async Task<IActionResult> Index()
+        {
+            return View(await _personalAppService.GetAll());
         }
 
         [CustomAuthorize("Personals", "Write")]
